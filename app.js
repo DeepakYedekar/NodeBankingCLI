@@ -14,15 +14,22 @@ var recursiveAsyncReadLine = function () {
         if (data[0] === 'exit') return rl.close();
 
         else if (data[0] === 'CREATE') {
-            let AccountNumber= data[1], name = data[2];
-            var Account = await Bank.create({ Name: name, AccountNumber: AccountNumber });
+            let AccountNumber = data[1], name = data[2];
+            let account = await Bank.find({ AccountNumber: AccountNumber });
+            if (account.length) {
+                console.log('account number is already present');
+            } else {
+                await Bank.create({ Name: name, AccountNumber: AccountNumber });
+            }
             recursiveAsyncReadLine();
         }
         else if (data[0] === 'DEPOSIT') {
             let AccountNumber = data[1], amount = data[2];
             let Account = await Bank.find({ AccountNumber: AccountNumber });
-            let updatedValue = Number(Account[0].Balance) + Number(amount);
-            await Bank.findOneAndUpdate({ AccountNumber: AccountNumber }, { Balance: updatedValue });
+            if (Account.length) {
+                let updatedValue = Number(Account[0].Balance) + Number(amount);
+                await Bank.findOneAndUpdate({ AccountNumber: AccountNumber }, { Balance: updatedValue });
+            }
             recursiveAsyncReadLine();
 
         } else if (data[0] === 'WITHDRAW') {
